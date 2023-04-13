@@ -8,14 +8,21 @@ import Exp
 import Parsing
 import Printing
 import REPLCommand
+import Eval
+import Sugar 
+
+
+transform :: ComplexExp -> ComplexExp 
+transform expression = sugarExp $ normalize simple 
+ where simple = desugarExp expression
 
 processRepl :: REPLCommand -> IO()
 processRepl (Quit) =  do {return ()} 
 processRepl (Load filename ) = do{putStrLn $ "load file " ++ filename ; main}
 processRepl (Eval string) = 
  case parse exprParser "command" string of
-  Left err -> do {  putStrLn $ "\ESC[31m";putStrLn $ show err;putStrLn $ "\ESC[0m"; main}
-  Right a -> do {putStrLn $ show a; main}
+  Left err -> do { putStrLn $ show err; main}
+  Right a -> do {putStrLn $ show $ transform a; main}
 
 processCommand :: String -> IO ()
 processCommand x = 

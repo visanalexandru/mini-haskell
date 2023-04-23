@@ -23,6 +23,7 @@ dependencies:
 - base >= 4.7 && < 5
 - parsec >=3
 - isocline >= 1.0.0
+- containers >= 0.5
 
 ghc-options:
 - -Wall

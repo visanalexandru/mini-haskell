@@ -7,9 +7,10 @@ import Text.ParserCombinators.Parsec.Language
 import Text.ParserCombinators.Parsec.Token
 import Control.Applicative (some)
 import Text.Parsec.Token
+import Text.Parsec.String
 
 miniHaskellDef :: LanguageDef st
-miniHaskellDef = haskellStyle {reservedNames = (reservedNames haskellStyle) ++ ["let","letrec", "in"], reservedOpNames = (reservedOpNames haskellStyle) ++ ["\\","->", "="]} 
+miniHaskellDef = haskellStyle {reservedNames = (reservedNames haskellStyle) ++ ["let","letrec", "in"], reservedOpNames = (reservedOpNames haskellStyle) ++ ["\\","->", "=", ":="]} 
 
 miniHs :: TokenParser st
 miniHs = makeTokenParser miniHaskellDef
@@ -25,6 +26,9 @@ m_identifier = identifier miniHs
 m_reservedOp = reservedOp miniHs
 m_reserved = reserved miniHs 
 m_operator = operator miniHs
+m_semi = semi miniHs
+m_semiSep1 = semiSep1 miniHs
+m_whiteSpace = whiteSpace miniHs
 
 var :: Parser Var
 var = do {x<- (m_identifier <|> (m_operator)); return $ Var x}
@@ -78,7 +82,7 @@ expr =  do {list <-  (some basicExp); return $ foldl (CApp) (head list) (tail li
 -- CLam (Var {getVar = "x"}) (List [CX (Var {getVar = "x"}),CX (Var {getVar = "y"}),CX (Var {getVar = "z"})])
 
 exprParser :: Parser ComplexExp
-exprParser = whiteSpace miniHs *> expr <* eof
+exprParser = m_whiteSpace *> expr <* eof
 -- >>> testParse exprParser "let x := 28 in \\y -> + x y"
 -- Let (Var {getVar = "x"}) (Nat 28) (CLam (Var {getVar = "y"}) (CApp (CApp (CX (Var {getVar = "+"})) (CX (Var {getVar = "x"}))) (CX (Var {getVar = "y"}))))
 
